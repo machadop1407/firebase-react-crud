@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import "./App.css";
 import { db } from "./firebase-config";
 import {
@@ -9,14 +9,20 @@ import {
     deleteDoc,
     doc,
 } from "firebase/firestore";
+import { UserContext } from "./components/users/User";
+
 
 function Items() {
+    const user = useContext(UserContext);
+    let userName = user.loggedInUser.username
+
     const [newName, setNewName] = useState("");
     const [newprice, setNewprice] = useState(0);
     const [counter, setNewCounter] = useState(0);
 
     const [drinks, setdrinks] = useState([]);
-    const drinksCollectionRef = collection(db, "drinks");
+    const drinksCollectionRef = collection(db, `${userName}/items/drinks`);
+
     const createdrink = async () => {
         setNewCounter(counter + 1);
         await addDoc(drinksCollectionRef, {
@@ -26,8 +32,9 @@ function Items() {
         });
     };
 
+
     const updatedrink = async (id, price) => {
-        const drinkDoc = doc(db, "drinks", id);
+        const drinkDoc = doc(db, `${userName}/items/drinks`, id);
         const newFields = { price: price + 1 };
         console.log(counter);
         setNewCounter(counter + 1);
@@ -35,21 +42,21 @@ function Items() {
     };
 
     const updateQuantity = async (id, quantity) => {
-        const drinkDoc = doc(db, "drinks", id);
+        const drinkDoc = doc(db, `${userName}/items/drinks`, id);
         const newFields = { quantity: quantity + 1 };
         setNewCounter(counter + 1);
         await updateDoc(drinkDoc, newFields);
     };
 
     const decreaseQuantity = async (id, quantity) => {
-        const drinkDoc = doc(db, "drinks", id);
+        const drinkDoc = doc(db, `${userName}/items/drinks`, id);
         const newFields = { quantity: quantity - 1 };
         setNewCounter(counter + 1);
         await updateDoc(drinkDoc, newFields);
     };
 
     const deletedrink = async id => {
-        const drinkDoc = doc(db, "drinks", id);
+        const drinkDoc = doc(db, `${userName}/items/drinks`, id);
         setNewCounter(counter + 1);
         await deleteDoc(drinkDoc);
     };
@@ -63,11 +70,6 @@ function Items() {
 
         getdrinks();
     }, [counter]);
-
-    useEffect(() => {
-        // this will run if `counter1` OR `counter2` changes
-        console.log("Either counter1 or counter2 changed (or both");
-    }, [doc]);
 
     return (
         <div className="App">
